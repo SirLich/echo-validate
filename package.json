@@ -1,0 +1,35 @@
+{
+    "name": "echo-validate",
+    "displayName": "Echo:NPC",
+    "description": "Validate templates for the Echo:NPC tool",
+    "version": "1.0.0",
+    "icon": "images/icon.ico",
+    "publisher": "SirLich",
+    "engines": {
+        "vscode": "^1.53.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "jsonValidation": [
+            {
+                "fileMatch": [
+                    "**/templates/**.json",
+                    "**echo.json"
+                ],
+                "url": "./schemas/echo-npc.json"
+            },
+            {
+                "fileMatch": [
+                    "**/settings/settings.json",
+                    "**/settings/custom_settings.json",
+                    "**/settings/projects/**.json",
+                    "**/settings/configs/**.json"
+
+                ],
+                "url": "./schemas/echo-settings.json"
+            }
+        ]
+    }
+}

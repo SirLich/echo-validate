@@ -1,0 +1,402 @@
+{
+    "$id": "echo-npc",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/echo",
+    "definitions": {
+        "echo": {
+            "type": "object",
+            "properties": {
+                "header": {
+                    "$ref": "#/definitions/header"
+                },
+                "states": {
+                    "$ref": "#/definitions/states"
+                },
+                "entity": {
+                    "$ref": "#/definitions/entity"
+                }
+            }
+        },
+        "header": {
+            "$ref": "echo-settings.json"
+        },
+        "states": {
+            "type": "array",
+            "title": "States",
+            "items": {
+                "$ref": "#/definitions/state"
+            }
+        },
+        "entity": {
+            "type": [
+                "string",
+                "object"
+            ],
+            "title": "Entity",
+            "description": "Entity definition can either be an entity_template, or an actual entity: (Don't include both, pick one)",
+            "if": {
+                "type": "object"
+            },
+            "then": {
+                "$ref": "https://aexer0e.github.io/bedrock-schema"
+            }
+        },
+        "state": {
+            "type": "object",
+            "title": "State",
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "const": null
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/standard_state"
+                    }
+                },
+                {
+                    
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "const": "standard"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/standard_state"
+                    }
+                },
+                {
+                    
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "const": "single"
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/single_state"
+                    }
+                }
+            ]
+        },
+        "single_state": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "single"
+                }
+            }
+        },
+        "standard_state": {
+            "title": "State",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "standard"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "description": "The name of the state.",
+                    "pattern": "^[a-z]+[a-z_,\\-,1-9]*$"
+                },
+                "next": {
+                    "title": "Next",
+                    "type": "string",
+                    "description": "Determines what state to move to after the sub-states are used up."
+                },
+                "length": {
+                    "title": "Length",
+                    "type": "integer",
+                    "description": "Manually set how many sub-states to create. Not required in most cases."
+                },
+                "text": {
+                    "title": "Text",
+                    "description": "Define your text with set-lang, or a list! Text is based on text_format, and is traditionally used to make your entities run a /say command.",
+                    "type": [
+                        "array",
+                        "object"
+                    ],
+                    "$ref": "#/library/set_lang_group"
+                },
+                "commands": {
+                    "title": "Commands",
+                    "description": "Define your commands with set-lang, or a list! Commands will play when this state runs.",
+                    "type": [
+                        "array",
+                        "object"
+                    ],
+                    "$ref": "#/library/set_lang_group"
+                },
+                "custom_components": {
+                    "title": "Custom Components",
+                    "description": "Define your custom components with set-lang, or a list! Custom components are pulled from component_templates in settings files. The component(s) will be added when this state is entered.",
+                    "type": [
+                        "array",
+                        "object"
+                    ],
+                    "$ref": "#/library/set_lang_group"
+                },
+                "transitions": {
+                    "title": "Transitions",
+                    "type": [
+                        "array",
+                        "object"
+                    ],
+                    "description": "Define your transitions with set-lang, or a list! Transitions define when your entity will move to your next state. Various default transitions are supplied, but you can also define custom transitions.",
+                    "$ref": "#/library/transitions_format"
+                },
+                "components": {
+                    "title": "Components",
+                    "type": "object",
+                    "description": "Components can be added into the entity using set-lang arguments.",
+                    "patternProperties": {
+                        "^((\\d+)|((all)|(last)|(end)|(first)|(second)))-*((\\d*)|((all)|(last)|(end)|(first)|(second)))$": {
+                            "type": "object",
+                            "$ref": "https://aexer0e.github.io/bedrock-schema#/definitions/components"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            }
+        }
+    },
+    "library": {
+        "transitions": {
+            "type": "string",
+            "examples": [
+                "hit_by_player",
+                "pathfinding",
+                "near_mob",
+                "has_tag",
+                "reverse_proximity",
+                "protected_reverse_proximity",
+                "proximity_ignore_tag",
+                "proximity",
+                "protected_proximity",
+                "timer",
+                "interact_with_item",
+                "interact"
+            ],
+            "allOf": [
+                {
+                    "if": {
+                        "pattern": "^(pathfinding ).*$"
+                    },
+                    "then": {
+                        "description": "Causes the entity to move towards another entity. <pathfinding> <target family> [movement speed] [how close the entity goes] [how close before complete] [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(near_mob ).*$"
+                    },
+                    "then": {
+                        "description": "Detects proximity to a particular mob-family. \n<near_mob> <family> <distance> [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(hit_by_player ).*$"
+                    },
+                    "then": {
+                        "description": "This is the “left click” transition (attack). \n<hit_by_player> [deals damage] [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(interact ).*$"
+                    },
+                    "then": {
+                        "description": "This is the “right click” transition. If no transitions are supplied, this transition is used.\n<interact> [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(timer).*$"
+                    },
+                    "then": {
+                        "description": "This is a simple timer: It will run after the time runs down.\n<timer> [time in second] [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(interact_with_item).*$"
+                    },
+                    "then": {
+                        "description": "Tests for a right click with a specific item.\n<interact_has_item> <item identifier> [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(proximity).*$"
+                    },
+                    "then": {
+                        "description": "Tests for when a player is within a set distance.\n<proximity> [ditance in blocks] [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(reverse_proximity).*$"
+                    },
+                    "then": {
+                        "description": "Tests for when NO players are within a set distance.\n<reverse_proximity> [distance in blocks] [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(protected_proximity).*$"
+                    },
+                    "then": {
+                        "description": "Tests for when a player is within a set distance, ignoring platers with 'dev' tag.\n<proximity> [ditance in blocks] [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(protected_reverse_proximity).*$"
+                    },
+                    "then": {
+                        "description": "Tests for when NO players are within a set distance, ignoring platers with 'dev' tag.\n<reverse_proximity> [distance in blocks] [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(has_tag).*$"
+                    },
+                    "then": {
+                        "description": "Tests for if the entity has a specific tag.\n<has_tag> <tag> [event]"
+                    }
+                }
+            ]
+        },
+        "text_format": {
+            "if": {
+                "type": "object"
+            },
+            "then": {
+                "patternProperties": {
+                    "^((\\d+)|((all)|(last)|(end)|(first)|(second)))-*((\\d*)|((all)|(last)|(end)|(first)|(second)))$": {
+                        "type": [
+                            "string",
+                            "array"
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "custom_components_format": {
+            "if": {
+                "type": "object"
+            },
+            "then": {
+                "patternProperties": {
+                    "^((\\d+)|((all)|(last)|(end)|(first)|(second)))-*((\\d*)|((all)|(last)|(end)|(first)|(second)))$": {
+                        "type": [
+                            "string",
+                            "array"
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "set_lang_group": {
+            "if": {
+                "type": "object"
+            },
+            "then": {
+                "patternProperties": {
+                    "^((\\d+)|((all)|(last)|(end)|(first)|(second)))-*((\\d*)|((all)|(last)|(end)|(first)|(second)))$": {
+                        "type": [
+                            "string",
+                            "array"
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {
+                "items": {
+                    "type": [
+                        "string",
+                        "array"
+                    ]
+                }
+            }
+        },
+        "transitions_format": {
+            "if": {
+                "type": "object"
+            },
+            "then": {
+                "patternProperties": {
+                    "^((\\d+)|((all)|(last)|(end)|(first)|(second)))-*((\\d*)|((all)|(last)|(end)|(first)|(second)))$": {
+                        "type": [
+                            "string",
+                            "array"
+                        ],
+                        "$ref": "#/library/transitions",
+                        "if": {
+                            "type": "string"
+                        },
+                        "then": {
+                            "$ref": "#/library/transitions"
+                        },
+                        "else": {
+                            "items": {
+                                "type": "string",
+                                "$ref": "#/library/transitions"
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {
+                "if": {
+                    "type": "array"
+                },
+                "then": {
+                    "items": {
+                        "type": "string",
+                        "$ref": "#/library/transitions"
+                    }
+                },
+                "else": {
+                    "type": "string",
+                    "$ref": "#/library/transitions"
+                }
+            }
+        }
+    }
+}

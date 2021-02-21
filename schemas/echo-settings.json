@@ -1,0 +1,215 @@
+{
+    "$id": "echo-settings",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/settings",
+    "definitions": {
+        "settings": {
+            "type": "object",
+            "title": "Header",
+            "description": "File-specific settings. Uses the same format as settings.json",
+            "additionalProperties": false,
+            "properties": {
+                "default_state": {
+                    "title": "Default State",
+                    "type": "string",
+                    "description": "Sets default state to add when the entity is spawned. Default state \"none\" means that no state will be added.",
+                    "default": "main",
+                    "examples": [
+                        "main"
+                    ]
+                },
+                "default_transitions": {
+                    "title": "Default Transitions",
+                    "type": "array",
+                    "description": "Sets default transition to use, when none is specified. 'interact' by default. You can set to a blank list if you want the default behavior to include no transitions.",
+                    "default": [
+                        "interact"
+                    ],
+                    "items": {
+                        "$ref": "echo-npc.json#/library/transitions"
+                    }
+                },
+                "sound_template": {
+                    "title": "Sound Template",
+                    "type": "string",
+                    "description": "This is the template for the sounds list.\nThe \"SOUND\" part will be replaced by whatever argument",
+                    "default": "/playsound SOUND @a ~ ~ ~",
+                    "examples": [
+                        "/playsound SOUND @a ~ ~ ~"
+                    ]
+                },
+                "text_template": {
+                    "title": "Text Template",
+                    "type": "string",
+                    "description": "This is the template for the text list.\nThe \"TEXT\" part will be replaced by whatever argument",
+                    "default": "/say TEXT",
+                    "examples": [
+                        "/say TEXT",
+                        "/tellraw @a {\"rawtext\":[{\"translate\" : \"TEXT\"}]}"
+                    ]
+                },
+                "output_type": {
+                    "title": "Output Type",
+                    "type": "string",
+                    "description": "Default output location.",
+                    "examples": [
+                        "here",
+                        "dev",
+                        "world"
+                    ],
+                    "allOf": [
+                        {
+                            "if": {
+                                "const": "here"
+                            },
+                            "then": {
+                                "description": "Exports into the same folder as Echo was run in."
+                            }
+                        },
+                        {
+                            "if": {
+                                "items": {
+                                    "const": "dev"
+                                }
+                            },
+                            "then": {
+                                "description": "Searches for the BP in the development_behavior_pack folder, based on Manifest ID"
+                            }
+                        },
+                        {
+                            "if": {
+                                "items": {
+                                    "const": "world"
+                                }
+                            },
+                            "then": {
+                                "description": "Searches for the BP in the minecraftWorlds folder, based on Manifest ID"
+                            }
+                        }
+                    ]
+                },
+                "default_state_type": {
+                    "title": "Default State Type",
+                    "type": "string",
+                    "description": "Default state type.",
+                    "default": "single",
+                    "examples": [
+                        "standard",
+                        "single"
+                    ]
+                },
+                "max_allowed_states": {
+                    "title": "Max Allowed States",
+                    "type": "integer",
+                    "description": "Maximum amount of states before 'large-entity' warnings will be issued.'. Set higher if you don't want so many warnings.",
+                    "default": 20
+                },
+                "entity_templates": {
+                    "title": "Entity Templates",
+                    "type": "object",
+                    "description": "Please read the Echo:NPC Documentation for details.",
+                    "patternProperties": {
+                        "^.*$": {
+                            "title": "Entity",
+                            "type": "object",
+                            "$ref": "https://aexer0e.github.io/bedrock-schema/"
+                        }
+                    }
+                },
+                "component_templates": {
+                    "title": "Component Templates",
+                    "type": "object",
+                    "description": "Please read the Echo:NPC Documentation for details.",
+                    "patternProperties": {
+                        "^.*$": {
+                            "title": "Component",
+                            "type": "object",
+                            "$ref": "https://aexer0e.github.io/bedrock-schema#/definitions/components"
+                        }
+                    }
+                },
+                "command_templates": {
+                    "title": "Command Templates",
+                    "type": "object",
+                    "description": "Please read the Echo:NPC Documentation for details."
+                },
+                "transition_templates": {
+                    "title": "Transition Templates",
+                    "type": "object",
+                    "description": "Please read the Echo:NPC Documentation for details.",
+                    "patternProperties": {
+                        "^.*$": {
+                            "title": "Transition",
+                            "type": "object",
+                            "$ref": "https://aexer0e.github.io/bedrock-schema#/definitions/components"
+                        }
+                    }
+                },
+                "user_account": {
+                    "type": "string",
+                    "description": "On systems with multiple users, Echo:NPC can fail to find your com.mojang folder. Provide the name of the account that contains com.mojang. C:/sirlich/.../com.mojang for example. You would type sirlich in this case.",
+                    "examples": [
+                        "sirlich"
+                    ]
+                },
+                "subpath": {
+                    "type": "string",
+                    "description": "The subpath that your files will be created under. This is useful for organizing your projects.",
+                    "examples": [
+                        "echo",
+                        "echo_npc",
+                        "compiled_templates"
+                    ]
+                },
+                "entity_subpath": {
+                    "type": "string",
+                    "description": "The same as subpath, except it will only effect the exported entities, not animation controllers.",
+                    "examples": [
+                        "echo",
+                        "echo_npc",
+                        "compiled_templates"
+                    ]
+                },
+                "animation_controller_subpath": {
+                    "type": "string",
+                    "description": "The same as subpath, except it will only effect the exported animation controllers, not entities.",
+                    "examples": [
+                        "echo",
+                        "echo_npc",
+                        "compiled_templates"
+                    ]
+                },
+                "entity_name_format": {
+                    "type": "string",
+                    "description": "Sets the name of the exported entity file. NAME will be replaced with the name of your template file.",
+                    "examples": [
+                        "NAME.entity.json"
+                    ]
+                },
+                "animation_controller_name_format": {
+                    "type": "string",
+                    "description": "Sets the name of the exported animation controller file. NAME will be replaced with the name of your template file.",
+                    "examples": [
+                        "NAME.ac.json"
+                    ]
+                },
+                "manifest_id": {
+                    "type": "string",
+                    "description": "Set this to the manifest ID of your Behavior Pack. It is recommended to set this into one of the settings files, so you don't need to duplicate it into every template header.",
+                    "examples": [
+                        "62f18b93-4033-4050-b3ad-04aaebeeeec8"
+                    ]
+                },
+                "create_entities": {
+                    "type": "array",
+                    "description": "Creates entities, based on entity templates. Useful for creating target entities, etc.",
+                    "examples": [
+                        [
+                            "target my_target"
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}
