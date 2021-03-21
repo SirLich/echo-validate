@@ -2,7 +2,10 @@
     "name": "echo-validate",
     "displayName": "Echo:NPC",
     "description": "Validate templates for the Echo:NPC tool",
-    "version": "1.0.0",
+    "version": "1.1.0",
+    "repository": {
+        "url": "https://github.com/SirLich/echo-validate.git"
+    },
     "icon": "images/icon.ico",
     "publisher": "SirLich",
     "engines": {

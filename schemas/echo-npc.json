@@ -5,6 +5,7 @@
     "definitions": {
         "echo": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "header": {
                     "$ref": "#/definitions/header"
@@ -14,6 +15,32 @@
                 },
                 "entity": {
                     "$ref": "#/definitions/entity"
+                },
+                "components": {
+                    "$ref": "https://aexer0e.github.io/bedrock-schema#/definitions/components"
+                },
+                "custom_components": {
+                    "type":"array",
+                    "description": "Custom components listed here will be added directly to the entities components object, overriding existing components of the same name. They are permanent, and won't be added or removed during Echo lifetime."
+                },
+                "randomizers": {
+                    "type":"object",
+                    "description": "Defines a list of randomizers, which can be used to randomize transitions in your entity.",
+                    "additionalProperties": {
+                        "type": "object",
+                        "description": "This object name will become a valid 'event' which you can use wherever you would normally use a transition. The elements inside define the possible choices, and their weights.",
+                        "additionalProperties": {
+                            "description": "The name of an Echo:NPC state, which you want to include in the randomizer as a choice. Format is: 'event_name': weight",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "on_death": {
+                    "type": "array",
+                    "description": "A list of commands that will be run when the entity dies.",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -23,6 +50,12 @@
         "states": {
             "type": "array",
             "title": "States",
+            "description": "The work-horse of the Echo:NPC template! This object contains the list of 'states' that Echo:NPC will use to create your entities dynamic behavior. Each state can contain many sub-states, and each sub-state is responsible for playing commands, adding/removing components, and creating transitions to move to additional states.",
+            "examples": [
+                {
+                    "name": "main"
+                }
+            ],
             "items": {
                 "$ref": "#/definitions/state"
             }
@@ -194,42 +227,26 @@
             "allOf": [
                 {
                     "if": {
-                        "pattern": "^(pathfinding ).*$"
+                        "pattern": "^(pathfinding).*$"
                     },
                     "then": {
-                        "description": "Causes the entity to move towards another entity. <pathfinding> <target family> [movement speed] [how close the entity goes] [how close before complete] [event]"
+                        "description": "Causes the entity to move towards another entity. \n\npathfinding (target family) [movement speed] [how close the entity goes] [how close before complete] [event]"
                     }
                 },
                 {
                     "if": {
-                        "pattern": "^(near_mob ).*$"
+                        "pattern": "^(near_mob).*$"
                     },
                     "then": {
-                        "description": "Detects proximity to a particular mob-family. \n<near_mob> <family> <distance> [event]"
+                        "description": "Detects proximity to a particular mob-family. \n\nnear_mob (family) (distance) [event]"
                     }
                 },
                 {
                     "if": {
-                        "pattern": "^(hit_by_player ).*$"
+                        "pattern": "^(hit_by_player).*$"
                     },
                     "then": {
-                        "description": "This is the “left click” transition (attack). \n<hit_by_player> [deals damage] [event]"
-                    }
-                },
-                {
-                    "if": {
-                        "pattern": "^(interact ).*$"
-                    },
-                    "then": {
-                        "description": "This is the “right click” transition. If no transitions are supplied, this transition is used.\n<interact> [event]"
-                    }
-                },
-                {
-                    "if": {
-                        "pattern": "^(timer).*$"
-                    },
-                    "then": {
-                        "description": "This is a simple timer: It will run after the time runs down.\n<timer> [time in second] [event]"
+                        "description": "This is the “left click” transition (attack). \n\nhit_by_player [deals damage] [event]"
                     }
                 },
                 {
@@ -237,7 +254,23 @@
                         "pattern": "^(interact_with_item).*$"
                     },
                     "then": {
-                        "description": "Tests for a right click with a specific item.\n<interact_has_item> <item identifier> [event]"
+                        "description": "Tests for a right click with a specific item.\n\ninteract_has_item (item identifier) [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(interact).*$"
+                    },
+                    "then": {
+                        "description": "This is the “right click” transition. If no transitions are supplied, this transition is used.\n\ninteract [event]"
+                    }
+                },
+                {
+                    "if": {
+                        "pattern": "^(timer).*$"
+                    },
+                    "then": {
+                        "description": "This is a simple timer: It will run after the time runs down.\n\ntimer [time in second] [event]"
                     }
                 },
                 {
@@ -245,7 +278,7 @@
                         "pattern": "^(proximity).*$"
                     },
                     "then": {
-                        "description": "Tests for when a player is within a set distance.\n<proximity> [ditance in blocks] [event]"
+                        "description": "Tests for when a player is within a set distance.\n\nproximity [distance in blocks] [event]"
                     }
                 },
                 {
@@ -253,7 +286,7 @@
                         "pattern": "^(reverse_proximity).*$"
                     },
                     "then": {
-                        "description": "Tests for when NO players are within a set distance.\n<reverse_proximity> [distance in blocks] [event]"
+                        "description": "Tests for when NO players are within a set distance.\n\nreverse_proximity [distance in blocks] [event]"
                     }
                 },
                 {
@@ -261,7 +294,7 @@
                         "pattern": "^(protected_proximity).*$"
                     },
                     "then": {
-                        "description": "Tests for when a player is within a set distance, ignoring platers with 'dev' tag.\n<proximity> [ditance in blocks] [event]"
+                        "description": "Tests for when a player is within a set distance, ignoring platers with 'dev' tag.\n\nproximity [distance in blocks] [event]"
                     }
                 },
                 {
@@ -269,7 +302,7 @@
                         "pattern": "^(protected_reverse_proximity).*$"
                     },
                     "then": {
-                        "description": "Tests for when NO players are within a set distance, ignoring platers with 'dev' tag.\n<reverse_proximity> [distance in blocks] [event]"
+                        "description": "Tests for when NO players are within a set distance, ignoring platers with 'dev' tag.\n\nreverse_proximity [distance in blocks] [event]"
                     }
                 },
                 {
@@ -277,7 +310,7 @@
                         "pattern": "^(has_tag).*$"
                     },
                     "then": {
-                        "description": "Tests for if the entity has a specific tag.\n<has_tag> <tag> [event]"
+                        "description": "Tests for if the entity has a specific tag.\n\nhas_tag (tag) [event]"
                     }
                 }
             ]
@@ -355,6 +388,10 @@
             }
         },
         "transitions_format": {
+            "type": [
+                "object",
+                "array"
+            ],
             "if": {
                 "type": "object"
             },
@@ -383,18 +420,23 @@
                 "additionalProperties": false
             },
             "else": {
-                "if": {
-                    "type": "array"
-                },
-                "then": {
-                    "items": {
-                        "type": "string",
+                "items": {
+                    "type": [
+                        "string",
+                        "array"
+                    ],
+                    "if": {
+                        "type": "string"
+                    },
+                    "then": {
                         "$ref": "#/library/transitions"
+                    },
+                    "else": {
+                        "items": {
+                            "type": "string",
+                            "$ref": "#/library/transitions"
+                        }
                     }
-                },
-                "else": {
-                    "type": "string",
-                    "$ref": "#/library/transitions"
                 }
             }
         }
